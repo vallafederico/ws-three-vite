@@ -14,7 +14,7 @@ export class Scene extends ThreeScene {
   }
 
   async load() {
-    this.assets = await loadAssets();
+    // this.assets = await loadAssets();
     // console.log(this.assets);
 
     this.create();

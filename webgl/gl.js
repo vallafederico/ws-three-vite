@@ -13,7 +13,9 @@ export class Gl {
     this.nuxt = $nuxt;
   }
 
-  start({ canvas }) {
+  start({ canvas, items }) {
+    this.items = items;
+    // console.log("items", items);
     // window.app = this;
     this.setup(canvas);
     this.init();

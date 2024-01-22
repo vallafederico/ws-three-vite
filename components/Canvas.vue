@@ -1,14 +1,13 @@
 <script setup>
-  import useWindowResize from "~/composables/useWindowResize";
-
   const { $webgl } = useNuxtApp();
+  import { items } from "../utils/items.js";
 
   const canvas = ref(null);
 
   useWindowResize((entry) => $webgl.gl.resize(entry[0]), canvas);
   onMounted(() => {
     // start when we have the canvas
-    $webgl.gl.start({ canvas: canvas.value });
+    $webgl.gl.start({ canvas: canvas.value, items });
   });
 </script>
 

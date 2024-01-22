@@ -1,10 +1,9 @@
 # Threejs Nuxt Workshop
 
-(Live Preview)[giga-webgl.vercel.app]
+(Live Preview)[ws-three-vite.vercel.app]
 
-```node
-git checkout {{step #}}
-```
+You can follow the steps by calling
+`git checkout` `step #`
 
 ## Three Nuxt Boilerplate
 
@@ -123,14 +122,16 @@ This classes are the starters of almost all you'll need to do. You should use th
 
 - `gsap.js` - wraps our gsap. In this case also provides the SINGLE raf we'll be using in the whole project. We attach it to the scroll in the plugin folder and we use it inside the `gl.js` to trigger the `render()` function
 
+---
+
+---
+
 ## 1. Project Setup
 
 **checkout ``**
 _mark !1_
 
----
-
-## 2. Project Setup
+## ?. ...
 
 **checkout ``**
-_mark !2_
+_mark !?_

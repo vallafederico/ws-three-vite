@@ -1,12 +1,4 @@
-# Threejs Nuxt Workshop
-
-[Live Preview](giga-webgl.vercel.app)
-
-```node
-git checkout {{step #}}
-```
-
-## Three Nuxt Boilerplate
+# Three Nuxt Boilerplate
 
 ## Install / Plugins
 

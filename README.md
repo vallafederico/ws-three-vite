@@ -9,8 +9,8 @@ You can follow the steps by calling
 
 ## Install / Plugins
 
-- webgl with `three` (Threejs)[https://threejs.org/]
-- `vite-plugin-glsl -D` to be able to import shaders and use in separate files (NPM)[https://www.npmjs.com/package/vite-plugin-glsl]
+- webgl with `three` [Threejs](https://threejs.org/)
+- `vite-plugin-glsl -D` to be able to import shaders and use in separate files [NPM](https://www.npmjs.com/package/vite-plugin-glsl)
 
 ```js
 //  nuxt.config.ts

@@ -122,3 +122,19 @@ This classes are the starters of almost all you'll need to do. You should use th
 ##### Other
 
 - `gsap.js` - wraps our gsap. In this case also provides the SINGLE raf we'll be using in the whole project. We attach it to the scroll in the plugin folder and we use it inside the `gl.js` to trigger the `render()` function
+
+---
+
+---
+
+## 1. Project Setup
+
+**checkout ``**
+_mark !1_
+
+---
+
+## 2. Project Setup
+
+**checkout ``**
+_mark !2_

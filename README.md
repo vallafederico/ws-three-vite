@@ -292,8 +292,10 @@ void main() {
 
 ## 3. Raycasting (3d events)
 
+### 3.1 Raycasting Basics
+
 **checkout `7c33c8e`**
-_(mark !3)_
+_(mark !3.1)_
 
 The [Raycaster](https://threejs.org/docs/#api/en/core/Raycaster) is a class in three that allows us to to cast a ray from the camera to a mouse (or any vector2 position) and check if it intersects with any mesh on the scene. We use it to calculate clicks on meshes based on intersections.
 
@@ -382,6 +384,62 @@ create({ geometry, diffuse, matcap }) {
 
   this.add(...group.children, this.target);
 }
+```
+
+### 3.2 Sending events and changing page
+
+**checkout `...`**
+_(mark !3.2)_
+
+- **Setup basic Event pipeline:**
+  - from `index.vue` we set a click event
+  - it's quite conveninent to do it like this so it automatically unmounts and we don't need to handle state from the webgl
+    - you might want to use better names for specific events, but in this case it's the only one so it's fine
+  - we slightly modify the `castRay()` function to return more data
+    - to do that we also modify what info get to the `ring.js` and what we load from there
+
+```vue
+<div @click="$webgl.gl.onClick" class="h-screen py-10"></div>
+```
+
+```js
+
+// *gl.js
+castRay() {
+  // ...
+
+  if (intersects) {
+    // restructure intersects to get more data
+    const { parent } = intersects.object;
+    return parent.data;
+  } else {
+    return null;
+  }
+}
+
+// * scene.js
+async load({ items }) {
+  this.rings = new Group();
+
+  this.rings.add(
+    ...items.map((item, index) => {
+      return new Ring({
+        // pass the 2hole info to the ring
+        data: item,
+        index,
+      });
+    })
+  );
+  // ...
+}
+
+// * ring.js
+async load({ matcap }) {
+  // only pass the webgl to the loader
+  const { model, diffuse } = await loadAssets(this.data.webgl);
+  // ...
+}
+
 ```
 
 ---

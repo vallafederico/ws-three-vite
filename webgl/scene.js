@@ -16,7 +16,8 @@ export class Scene extends ThreeScene {
     this.rings.add(
       ...items.map((item, index) => {
         return new Ring({
-          data: item.webgl,
+          // !3.2 pass the shole info to the ring
+          data: item,
           index,
         });
       })

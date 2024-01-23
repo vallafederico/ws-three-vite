@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <!-- !3 add mouse move from app.vue -->
+  <!-- !3.1 add mouse move from app.vue -->
   <main @mousemove="$webgl.gl.onMouseMove" class="relative z-10">
     <Preloader />
     <Nav />

@@ -20,7 +20,8 @@ export class Ring extends Group {
 
   async load({ matcap }) {
     // !1 load assets
-    const { model, diffuse } = await loadAssets(this.data);
+    // !3.2 only pass the webgl to the loader
+    const { model, diffuse } = await loadAssets(this.data.webgl);
 
     this.create({ geometry: model, diffuse, matcap }); // !2 pass matcap to create
   }

@@ -58,10 +58,10 @@ export class Gl {
 
     this.scene = new Scene();
 
-    this.setupControls(); // !1 temporarily enable controls
+    // this.setupControls(); // !1 temporarily enable controls
     // this.setupPost();
 
-    // !3 initialise raycaster
+    // !3.1 initialise raycaster
     this.raycaster = new Raycaster();
     this.raycaster._isReady = false;
   }
@@ -87,7 +87,7 @@ export class Gl {
 
     this.shouldRender = true;
 
-    // !3 set raycaster targets and make it active
+    // !3.1 set raycaster targets and make it active
     this.raycaster._targets = this.scene.children[0].children.map(
       (item) => item.target
     );
@@ -131,27 +131,29 @@ export class Gl {
   }
 
   onMouseMove(e) {
-    // !3 mousemove event for raycasting, coordinates need normalisation
+    // !3.1 mousemove event for raycasting, coordinates need normalisation
     // comes from app.vue for consistency
     this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
     this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
 
-    this.castRay();
+    // this.castRay();
   }
 
   castRay() {
     if (!this.raycaster._isReady) return;
 
-    // !3 cast ray function from mouse position
+    // !3.1 cast ray function from mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
     const intersects =
       this.raycaster.intersectObjects(this.raycaster._targets)[0] || null;
 
     if (intersects) {
-      const { index } = intersects.object.parent;
-      console.log(index);
-      return index;
+      // !3.2 restructure intersects to get more data
+      const { parent } = intersects.object;
+      return parent.data;
+    } else {
+      return null;
     }
   }
 
@@ -160,7 +162,15 @@ export class Gl {
   }
 
   onClick() {
-    console.log("evt:click");
+    // !3.2 click event from homepage to navigate to page
+    // we could alternatively emit an event back to the page using $bus
+    // this also automatically unmounts so nice
+
+    const target = this.castRay();
+
+    if (target !== null) {
+      this.nuxt.$router.push("/" + target.slug);
+    }
   }
 
   onPageChange(name) {

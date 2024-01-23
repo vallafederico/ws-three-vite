@@ -6,6 +6,9 @@ export function loadTexture(url) {
     tl.load(url, (data) => {
       data.needsUpdate = true;
 
+      // !2 usually when dealing with texture models you want to NOT flip the texture
+      data.flipY = false;
+
       // add sizes (if needed for texture control)
       //   data.source.w = data.source.data.width;
       //   data.source.h = data.source.data.height;

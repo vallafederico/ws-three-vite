@@ -2,6 +2,5 @@
 // so no dots in the file name
 
 export const assets = {
-  duck_model: "/webgl/duck.glb",
-  uv_layout: "/webgl/uv-layout.jpg",
+  matcap: "/webgl/mtc_1.jpeg", // !2 add matcap to generic assets
 };

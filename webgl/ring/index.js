@@ -11,17 +11,22 @@ export class Ring extends Group {
     this.index = index;
   }
 
-  async load() {
+  async load({ matcap }) {
     // !1 load assets
     const { model, diffuse } = await loadAssets(this.data);
-    this.create(model, diffuse);
+
+    this.create({ geometry: model, diffuse, matcap }); // !2 pass matcap to create
   }
 
-  create(geometry, diffuse) {
+  create({ geometry, diffuse, matcap }) {
     // !1 change the pipeline
     const group = findGroup(geometry);
 
-    this.material = new Material();
+    this.material = new Material({
+      // !2 pass diffuse texture to the material
+      u_t1: diffuse,
+      u_matcap: matcap,
+    });
 
     group.traverse((item) => {
       if (item.isMesh) {
@@ -39,6 +44,10 @@ export class Ring extends Group {
 
   update(t) {
     this.material.time = t;
+
+    // !2 add simple movement to check out the light
+    this.rotation.y = t * 0.8;
+    this.rotation.x = t * 0.8;
   }
 }
 
@@ -50,7 +59,8 @@ class Material extends ShaderMaterial {
       side: DoubleSide,
       uniforms: {
         u_time: { value: options?.u_time || 0 },
-        u_t1: { value: options?.u_t1 || null },
+        u_t1: { value: options?.u_t1 || null }, // !2 this was already here, now has data
+        u_matcap: { value: options?.u_matcap || null }, // !2 add matcap to uniforms
       },
     });
   }

@@ -2,6 +2,7 @@ const defaults = {
   description: "This is a description of the item",
 };
 
+// !2 wrong name for texture in here corrected for "diffuse" from "texture"
 export const items = [
   {
     name: "000",
@@ -9,7 +10,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/001.glb",
-      texture: "/webgl/001.jpg",
+      diffuse: "/webgl/001.jpg",
     },
   },
   {
@@ -18,7 +19,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/002.glb",
-      texture: "/webgl/002.jpg",
+      diffuse: "/webgl/002.jpg",
     },
   },
   {
@@ -27,7 +28,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/003.glb",
-      texture: "/webgl/003.jpg",
+      diffuse: "/webgl/003.jpg",
     },
   },
   {
@@ -36,7 +37,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/004.glb",
-      texture: "/webgl/004.jpg",
+      diffuse: "/webgl/004.jpg",
     },
   },
   {
@@ -45,7 +46,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/005.glb",
-      texture: "/webgl/005.jpg",
+      diffuse: "/webgl/005.jpg",
     },
   },
   {
@@ -54,7 +55,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/006.glb",
-      texture: "/webgl/006.jpg",
+      diffuse: "/webgl/006.jpg",
     },
   },
   {
@@ -63,7 +64,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/007.glb",
-      texture: "/webgl/007.jpg",
+      diffuse: "/webgl/007.jpg",
     },
   },
   {
@@ -72,7 +73,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/008.glb",
-      texture: "/webgl/008.jpg",
+      diffuse: "/webgl/008.jpg",
     },
   },
   {
@@ -81,7 +82,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/009.glb",
-      texture: "/webgl/009.jpg",
+      diffuse: "/webgl/009.jpg",
     },
   },
   {
@@ -90,7 +91,7 @@ export const items = [
     ...defaults,
     webgl: {
       model: "/webgl/010.glb",
-      texture: "/webgl/010.jpg",
+      diffuse: "/webgl/010.jpg",
     },
   },
 ];

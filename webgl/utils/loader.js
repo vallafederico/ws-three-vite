@@ -19,7 +19,8 @@ export async function loadAssets(opt = null) {
     } else if (
       extension === "jpg" ||
       extension === "png" ||
-      extension === "webp"
+      extension === "webp" ||
+      extension === "jpeg" // !2 we need to add the extension as it's not covered
     ) {
       promises.push(loadTexture(asset));
     }

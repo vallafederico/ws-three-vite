@@ -1,6 +1,8 @@
 import { Scene as ThreeScene, Group } from "three";
 import { Ring } from "./ring";
 
+import { loadAssets } from "./utils/loader";
+
 export class Scene extends ThreeScene {
   shouldRender = false;
   constructor() {
@@ -23,7 +25,8 @@ export class Scene extends ThreeScene {
     this.add(this.rings);
 
     console.time("load::scene");
-    await Promise.all(this.rings.children.map((ring) => ring.load()));
+    const { matcap } = await loadAssets(); // !2 add matcap to loading pipeline
+    await Promise.all(this.rings.children.map((ring) => ring.load({ matcap })));
     console.timeEnd("load::scene");
 
     this.create();
@@ -35,6 +38,11 @@ export class Scene extends ThreeScene {
 
   update(t) {
     if (!this.shouldRender) return;
+
+    // !2 to rotate from the children update() we need to pass the time through
+    // notice we don't rotate the group as that will have it's own matrix
+    // and the rotation will not be correct
+    this.rings?.children.forEach((ring) => ring.update(t));
   }
 
   resize(vp) {

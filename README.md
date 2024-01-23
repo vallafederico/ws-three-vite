@@ -688,7 +688,7 @@ _Now this is fine because webgl is real fast, but in general if you want to go f
 
 ### 5.1 Post Processing Basics
 
-**checkout ``**
+**checkout `4a83b6a`**
 _(mark !5.1)_
 
 - to render a scene to a texture you control we use a WebGlRenderTarget

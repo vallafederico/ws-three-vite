@@ -800,7 +800,7 @@ void main() {
 
 ### 5.2 Threejs Default Passes
 
-_(mark !5.2)_
+\*_checkout ``\_\_(mark !5.2)_
 
 - **Basic Threejs passes:**
   - we now have an antiasing issue, since when using custom passes three can't do autoimatic antialising
@@ -839,8 +839,8 @@ resize(vp) {
 
 ### 5.3 Custom Passes
 
-**checkout ``**
-_(mark !5.2)_
+**checkout `2f13503`**
+_mark !5.3_
 
 - this approach allows for more complex scenes to be route dependant, take a first look at render targets, image blending and cool things in webgl
 
@@ -952,9 +952,5 @@ void main() {
 }
 
 ```
-
-#### Scene based page transition
-
-#### ??? Noise Post processing
 
 ---

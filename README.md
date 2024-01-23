@@ -5,6 +5,8 @@
 You can follow the steps by calling
 `git checkout` `{step #}`
 
+_3d models from [lumalabs](https://lumalabs.ai/)_
+
 ## 1. Project Setup
 
 **checkout `0e2ec0a`**

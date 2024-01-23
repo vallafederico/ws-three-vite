@@ -549,7 +549,7 @@ void main() {
 
 ### 4.2 Basic Slider
 
-**checkout ``**
+**checkout `d26ce87`**
 _(mark !4.2)_
 
 - **Sliding webgl scene:**

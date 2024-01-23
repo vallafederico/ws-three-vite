@@ -7,12 +7,18 @@
 
   const route = useRoute();
   const data = items.filter((item) => item.slug === route.params.item)[0];
-  //   console.log(data);
+
+  // !4.3 add the webgl context and pass mount function
+  const { $webgl } = useNuxtApp();
+
+  onBeforeMount(() => {
+    $webgl.gl.pageProduct(data.index);
+  });
 </script>
 
 <template>
   <div class="min-h-[200vh]">
-    Item: {{ data.name }}
+    Item: {{ data.name }} {{ data.index }}
 
     <div class="flex items-center justify-center h-screen">
       <Clicky />

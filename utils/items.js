@@ -3,7 +3,7 @@ const defaults = {
 };
 
 // !2 wrong name for texture in here corrected for "diffuse" from "texture"
-export const items = [
+const cms = [
   {
     name: "000",
     slug: "000",
@@ -95,3 +95,9 @@ export const items = [
     },
   },
 ];
+
+// !4.3 change export to keep index
+export const items = cms.map((item, index) => {
+  item.index = index;
+  return item;
+});

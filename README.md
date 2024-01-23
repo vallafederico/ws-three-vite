@@ -621,9 +621,64 @@ update(t, x) {
 }
 ```
 
-### 4.3 Page transition
+### 4.3 (Basic) Page transition
 
+**checkout ``**
 _(mark !4.3)_
+
+- **Page based animaton:**
+  - we create a custom function for each page that needs an animation in `gl.js`
+  - we restructure from the vue side the `onBeforeMount` to call the correct function
+  - we handle a bit of state for the raycaster and such
+
+_Added index in the "fake" cms so can be read from the function and passes to the init for the products. In a normal scenario you probably will match the array by slug (as the ring has the data) and find the correct one like this_
+
+```js
+
+pageProduct(index) {
+  this.shouldRaycast = false;
+
+  if (this.isInit) {
+    this.isInit = false;
+    // to handle initial state
+  } else {
+    // to handle when a page is transitioned to
+
+    // we move the slider to position
+    this.slider.toPosition(+index);
+
+    // we scale everything and keep the selected one
+    this.scene.rings.children.forEach((item, i) => {
+      item.onHover();
+
+      if (i !== +index) {
+        gsap.to(item.scale, {
+          x: 0,
+          y: 0,
+          z: 0,
+          duration: 0.8,
+          onComplete: () => {
+            item.visible = false;
+          },
+        });
+      } else {
+        gsap.to(item.scale, {
+          x: 2,
+          y: 2,
+          z: 2,
+          duration: 1,
+          ease: "back.out",
+        });
+      }
+    });
+  }
+}
+
+// ...
+// home reverses the state
+// about currently empty
+
+```
 
 ---
 

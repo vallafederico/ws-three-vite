@@ -16,6 +16,8 @@ export class Gl {
   a = {
     hoverCurr: null,
   };
+  // 4.3 add raycast state controller
+  shouldRaycast = true;
 
   constructor({ $nuxt }) {
     this.nuxt = $nuxt;
@@ -190,16 +192,8 @@ export class Gl {
     }
   }
 
-  onPageChange(name) {
-    if (this.isInit) {
-      this.isInit = false;
-      console.log("initialstate", name);
-    } else {
-      console.log("pagechange", name);
-    }
-  }
-
   onMouseMove(e) {
+    if (!this.shouldRaycast) return;
     // !3.1 mousemove event for raycasting, coordinates need normalisation
     // comes from app.vue for consistency
     this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
@@ -220,5 +214,91 @@ export class Gl {
   onMouseUp(e) {
     // console.log("mousedown");
     this.slider?.onMouseUp(e);
+  }
+
+  /** Pages */
+
+  // !4.3 don't need this anymore
+  // onPageChange(name) {
+  //   if (this.isInit) {
+  //     this.isInit = false;
+  //     console.log("initialstate", name);
+  //   } else {
+  //     console.log("pagechange", name);
+  //   }
+  // }
+
+  // !4.3 create page based functions
+  pageHome() {
+    this.shouldRaycast = true; // !4.3 control raycast
+
+    if (this.isInit) {
+      this.isInit = false;
+      // console.log("initialstate: home");
+    } else {
+      this.slider.toPosition();
+
+      this.scene.rings.children.forEach((item, i) => {
+        gsap.to(item.scale, {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 1,
+          ease: "expo.out",
+          onStart: () => {
+            item.visible = true;
+          },
+        });
+      });
+    }
+  }
+
+  pageProduct(index) {
+    this.shouldRaycast = false;
+
+    if (this.isInit) {
+      this.isInit = false;
+      // console.log("initialstat:product");
+    } else {
+      // console.log("transitionto:product");
+
+      // !4.3 we scale everything and keep the selected one
+      this.slider.toPosition(+index);
+
+      this.scene.rings.children.forEach((item, i) => {
+        item.onHover();
+
+        if (i !== +index) {
+          gsap.to(item.scale, {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.8,
+            onComplete: () => {
+              item.visible = false;
+            },
+          });
+        } else {
+          gsap.to(item.scale, {
+            x: 2,
+            y: 2,
+            z: 2,
+            duration: 1,
+            ease: "back.out",
+          });
+        }
+      });
+    }
+  }
+
+  pageAbout() {
+    this.shouldRaycast = false;
+
+    if (this.isInit) {
+      this.isInit = false;
+      console.log("initialstate: about");
+    } else {
+      console.log("about");
+    }
   }
 }

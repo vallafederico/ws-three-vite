@@ -10,6 +10,8 @@ import vertexShader from "./vertex.vert";
 import fragmentShader from "./fragment.frag";
 import { loadAssets } from "../utils/loader";
 
+import { gsap } from "../utils/gsap";
+
 export class Ring extends Group {
   constructor({ data, index }) {
     super();
@@ -65,6 +67,17 @@ export class Ring extends Group {
     this.rotation.y = t * 0.8;
     this.rotation.x = t * 0.8;
   }
+
+  /** Animation */
+  onHover(val = 0) {
+    // console.log("hover", val);
+
+    // (!4.1) hover state with gsap
+    gsap.to(this.material.uniforms.u_a_hover, {
+      value: val,
+      duration: 0.9,
+    });
+  }
 }
 
 class Material extends ShaderMaterial {
@@ -77,6 +90,8 @@ class Material extends ShaderMaterial {
         u_time: { value: options?.u_time || 0 },
         u_t1: { value: options?.u_t1 || null }, // !2 this was already here, now has data
         u_matcap: { value: options?.u_matcap || null }, // !2 add matcap to uniforms
+        // (!4.1) animation uniforms
+        u_a_hover: { value: 0 },
       },
     });
   }

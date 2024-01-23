@@ -446,17 +446,113 @@ async load({ matcap }) {
 
 ## 4. Basic Animations
 
-### 3D Model Hover
+- **Animating in Webgl:**
+  - Is done through **uniforms**
+  - With three you can also use scale and position for groups and meshes
+    - In this case what you're doing is effectively modifying uniforms you don't see as those are set automatically thanks to how the `ShaderMaterial` works
+
+### 4.1 3D Model Hover
 
 **checkout ``**
 _(mark !4.1)_
 
-### Basic Slider
+First animation we can build is a hover effect. We alreayd have the raycaster, we just need to make sure since it fires continuosly, that it only fires once per event. We can build it all inside the Ring class itself, and trigger the event from the gl class.
+
+- some simple logic in gl.js to make sure we call the event only once, and call this on mousemove
+- add a uniform for controlling the hover, and change it's value with gsap
+  - notice uniforms have a `.value` inside which is pretty convenient for how gsap works
+- then some basic modifications in shaders, scale and rotation for now
+  - notice that we just rotate the position vector that rotation is not going to respond to light
+  - this happens because we're using the normalMatrix which is an automatic three uniform, but that is not aware of this further modification
+  - to fix this we'll need to also rotate the normal if we're doing the operation on GPU and not CPU
+
+```js
+  // gl.js
+  castRay() {
+    // ...
+
+    const { parent } = intersects.object;
+    this.rayHover(parent.index); // call the hover function
+    return parent.data;
+  } else {
+    this.rayHover(); // and call it with no value
+    return null;
+  }
+}
+
+// hover function to change ring state
+rayHover(index = null) {ù
+// make sure runs only once
+  if (index === this.a.hoverCurr) return;
+
+  if (index !== null) {
+    this.scene.rings.children[index].onHover(1);
+  } else {
+    this.scene.rings.children[this.a.hoverCurr]?.onHover(0);
+  }
+
+  this.a.hoverCurr = index;
+}
+
+// * ring.js
+/** Animation */
+onHover(val = 0) {
+  // hover state with gsap
+  gsap.to(this.material.uniforms.u_a_hover, {
+    value: val,
+    duration: 0.9,
+  });
+}
+
+```
+
+- **Animating with uniforms:**
+  - We now have a value that updates on hover
+
+```c++
+// ...
+// pass the uniform to animate in shader
+uniform float u_a_hover;
+
+// import utility rotation function as shader chunk
+#include '../glsl/rotate.glsl'
+
+void main() {
+  vec3 pos = position;
+
+  // animate with the uniform
+  pos *= 1. + u_a_hover * .2;
+
+  float rot_fac = u_a_hover * MPI * .3;
+  pos = rotate(pos, vec3(-1., -1., -1.), rot_fac);
+  // rotate also normals as this rotation since it's done in shaders
+  // will not apply to the normalMatrix, so light will not be affected
+  vec3 nor = rotate(normal, vec3(-1., -1., -1.), rot_fac);
+
+
+  // update the position we're using for the model
+  vec4 transformed = modelViewMatrix * vec4(pos, 1.0);
+  v_view = normalize(- transformed.xyz);
+
+
+  gl_Position = projectionMatrix * transformed;
+  v_uv = uv;
+
+  // update the normal we're using so
+  // the material reacts correctly to lights
+  v_normal = normalize(normalMatrix * nor);
+  LIGHT_POS = vec3(0., 1., 0.);
+}
+
+
+```
+
+### 4.2 Basic Slider
 
 **checkout ``**
 _(mark !4.2)_
 
-### Page transition
+### 4.3 Page transition
 
 _(mark !4.3)_
 

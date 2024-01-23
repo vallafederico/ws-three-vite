@@ -11,6 +11,11 @@ export class Gl {
   time = 0;
   // !3 create mouse propery
   mouse = { x: 0, y: 0 };
+  // !4.1 create animation tracking object
+  a = {
+    hoverCurr: null,
+  };
+
   constructor({ $nuxt }) {
     this.nuxt = $nuxt;
   }
@@ -136,7 +141,7 @@ export class Gl {
     this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
     this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
 
-    // this.castRay();
+    this.castRay();
   }
 
   castRay() {
@@ -151,10 +156,24 @@ export class Gl {
     if (intersects) {
       // !3.2 restructure intersects to get more data
       const { parent } = intersects.object;
+      this.rayHover(parent.index); // !4.1 call
       return parent.data;
     } else {
+      this.rayHover(); // !4.1 call as empty
       return null;
     }
+  }
+
+  rayHover(index = null) {
+    // !4.1 hover function to change ring state
+    if (index === this.a.hoverCurr) return;
+    if (index !== null) {
+      this.scene.rings.children[index].onHover(1);
+    } else {
+      this.scene.rings.children[this.a.hoverCurr]?.onHover(0);
+    }
+
+    this.a.hoverCurr = index;
   }
 
   initEvts() {

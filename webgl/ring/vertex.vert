@@ -8,15 +8,26 @@ varying vec3 v_view;
 
 varying vec3 LIGHT_POS;
 
+// (!4.1) uniforms to animate in shader
+uniform float u_a_hover;
 
-
-
+#include '../glsl/rotate.glsl'
 
 void main() {
   vec3 pos = position;
+
+  // !4.1 animate with the uniform
+  pos *= 1. + u_a_hover * .2; 
+
+  float rot_fac = u_a_hover * MPI * .3; 
+  pos = rotate(pos, vec3(-1., -1., -1.), rot_fac);
+  // !4.1 rotate also normals as this rotation since it's done in shaders
+  // will not apply to the normalMatrix, so light will not be affected
+  vec3 nor = rotate(normal, vec3(-1., -1., -1.), rot_fac);
   
-  // matcap handling
-  vec4 transformed = modelViewMatrix * vec4(position, 1.0);
+
+  // !4.1 update the position we're using for the model
+  vec4 transformed = modelViewMatrix * vec4(pos, 1.0);
   v_view = normalize(- transformed.xyz);
 
 
@@ -27,6 +38,8 @@ void main() {
   // three automatically passes the normal matrix as a uniform
   // and will be coherent with the modelViewMatrix, which
   // is what we modify when setting rotation.x and rotation.y
-  v_normal = normalize(normalMatrix * normal); 
+
+  // !4.1 update the normal we're using
+  v_normal = normalize(normalMatrix * nor); 
   LIGHT_POS = vec3(0., 1., 0.);
 }

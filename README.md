@@ -127,7 +127,7 @@ export class Ring extends Group {
 
 ## 2. Shader Based Basic Materials
 
-**checkout ``**
+**checkout `a545b2d`**
 _(mark !2)_
 
 - **Passing Textures:**

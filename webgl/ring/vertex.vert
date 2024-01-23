@@ -41,5 +41,5 @@ void main() {
 
   // !4.1 update the normal we're using
   v_normal = normalize(normalMatrix * nor); 
-  LIGHT_POS = vec3(0., 1., 0.);
+  LIGHT_POS = vec3(1., 1., -1.);
 }

@@ -702,10 +702,6 @@ _(mark !5.1)_
 - postprocessing is a nice thing to tweak on mobile to recover performance if needed
 
 ```js
-
-
-
-
 //  * scene.js
 constructor({ vp }) {
   super({});
@@ -804,13 +800,158 @@ void main() {
 
 ### 5.2 Threejs Default Passes
 
-**checkout ``**
 _(mark !5.2)_
+
+- **Basic Threejs passes:**
+  - we now have an antiasing issue, since when using custom passes three can't do autoimatic antialising
+  - threejs has a pass you cna use made exactly for this
+  - there's lots of nice effects that can be used and can be checked out in the examples of three by searching post processing
+
+```js
+// * post.js
+
+// import needed passes from three
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
+
+createPasses() {
+  this.mixpass = new MixPass();
+  this.addPass(this.mixpass);
+
+  // create the pass (needs to be the last one)
+  this.fxaa = new ShaderPass(FXAAShader);
+  this.addPass(this.fxaa);
+}
+
+resize(vp) {
+  // resize passes (this needs to be called form gl.js)
+  this.vp = vp;
+
+  // pass resolution as uniforms (copied form the example)
+  this.fxaa.material.uniforms["resolution"].value.x =
+    1 / (this.vp.w * this.vp.dpr());
+  this.fxaa.material.uniforms["resolution"].value.y =
+    1 / (this.vp.w.h * this.vp.dpr());
+}
+```
+
+**Be aware that when using passes made by someone else those might have specific needs. Read the docs or you'll get weird errors.**
 
 ### 5.3 Custom Passes
 
 **checkout ``**
 _(mark !5.2)_
+
+- this approach allows for more complex scenes to be route dependant, take a first look at render targets, image blending and cool things in webgl
+
+  - there's no right or wrong, both are fine (but serve different purposes)
+
+- using multiple scenes based on the page
+- handling page based state
+- rendertarget and post processing
+
+- first we create an alternative collection of objects to show as a new scene `about.js`
+
+  - it's just a new scene, copied (and simplified) from `scene.js`
+
+- we also make some logic to make sure we can conveniently switch page and we don't render both at the same time when not needed
+
+- we add a function in post to handle the scene switch
+
+- we mix the two textures with an uniforms
+
+```js
+// * gl.js
+this.about = new AboutScene(this.vp); // !11
+
+pageAbout() {
+  this.switchPage(1);
+}
+
+render() {
+  // ...
+  if (this.scene && this.shouldRender)
+    this.ringsTexture = this.scene?.update(this.time, this.slider?.x || 0);
+
+  // we make the rendering of those conditional
+  // based on the shouldRender property
+  // so we control with a single one both the animations
+  // and the actual rendering process
+  if (this.about && this.about.shouldRender)
+    this.aboutTexture = this.about?.update(this.time);
+
+  if (this.post && this.post.isOn) {
+    this.post.renderPasses(this.time, this.ringsTexture, this.aboutTexture);
+    this.post.render();
+  } else {
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+async switchPage(value) {
+  // add a function to switch between different targets
+  // make sure we render both only when transitioning
+  // you might want to look at ping pong technique
+  // if your scenes are too heavy and don't want
+  // to render both at the same time
+
+  if (value === 1) {
+    // to about
+    this.aboutScene.shouldRender = true; // this controls raf
+    // technically not needed because we're using an if on the render function but you never know
+    this.aboutScene.visible = true;
+    await this.post.toPage(1);
+    this.scene.visible = false;
+    this.scene.shouldRender = false;
+  } else {
+    // to home
+    this.scene.shouldRender = true;
+    this.scene.visible = true;
+    await this.post.toPage(0);
+    this.aboutScene.visible = false;
+    this.aboutScene.shouldRender = false;
+  }
+}
+
+// * about.js
+// is just a real basic copy of our scene at this point
+
+// * post.js
+// ...
+
+/** Animation */
+toPage(val) {
+  // !11
+  return new Promise((resolve) => {
+    gsap.to(this.mixpass.uniforms.u_page, {
+      value: val,
+      duration: 1,
+      onComplete: () => {
+        resolve();
+      },
+    });
+  });
+}
+```
+
+```c++
+uniform sampler2D u_rings;
+uniform sampler2D u_about;
+
+uniform float u_page;
+
+void main() {
+    vec4 rings = texture2D(u_rings, vUv);
+    vec4 about = texture2D(u_about, vUv); // !11
+
+    vec3 diff = mix(rings.rgb, about.rgb, u_page);
+
+
+    gl_FragColor.rgb = diff;
+    gl_FragColor.a = 1.;
+}
+
+```
 
 #### Scene based page transition
 

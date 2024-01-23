@@ -10,6 +10,8 @@ export class MixPass extends ShaderPass {
         opacity: { value: 1.0 },
         // !5.1 read passed texture
         u_rings: { value: null },
+        u_about: { value: null },
+        u_page: { value: 0 },
       },
       vertexShader,
       fragmentShader,

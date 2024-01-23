@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 // import { gsap } from "../utils/gsap";
 
 import { Scene } from "./scene";
+import { AboutScene } from "./about";
 import { Post } from "./post";
 import { Slider } from "./slider";
 
@@ -46,7 +47,7 @@ export class Gl {
 
     // webgl renderer
     this.renderer = new WebGLRenderer({
-      antialias: true,
+      // antialias: true,
       alpha: true,
     });
 
@@ -69,6 +70,8 @@ export class Gl {
     this.vp.camera = this.camera;
 
     this.scene = new Scene({ vp: this.vp });
+    // !5.3 create about page scene
+    this.aboutScene = new AboutScene(this.vp);
 
     // this.setupControls(); // !1 temporarily enable controls
     this.setupPost(); // !5.1 enable post
@@ -120,6 +123,9 @@ export class Gl {
     this.camera.aspect = this.vp.aspect();
     this.camera.updateProjectionMatrix();
 
+    // !5.2 resize post
+    this.post?.resize(this.vp);
+
     this.scene?.resize(this.vp);
   }
 
@@ -135,10 +141,24 @@ export class Gl {
     // 4.2 pass slider X to scene
 
     // 5.1 get the rendered scene texture from the target and pass it to post
-    this.ringScene = this.scene?.update(this.time, this.slider.x || 0);
+
+    // !5.3
+    // we make the rendering of those conditional
+    // based on the shouldRender property
+    // so we control with a single one both the animations
+    // and the actual rendering process
+    if (this.scene && this.shouldRender)
+      this.ringTexture = this.scene?.update(this.time, this.slider.x || 0);
+
+    if (this.aboutScene && this.aboutScene.shouldRender)
+      this.aboutTexture = this.aboutScene?.update(this.time);
 
     if (this.post && this.post.isOn) {
-      this.post.renderPasses(this.time, { rings: this.ringScene });
+      this.post.renderPasses(this.time, {
+        // !5.3 pass both
+        rings: this.ringTexture,
+        about: this.aboutTexture,
+      });
       this.post.render();
     } else {
       this.renderer.render(this.scene, this.camera);
@@ -242,6 +262,7 @@ export class Gl {
       this.isInit = false;
       // console.log("initialstate: home");
     } else {
+      this.switchPage(0);
       this.slider.toPosition();
 
       this.scene.rings.children.forEach((item, i) => {
@@ -304,7 +325,33 @@ export class Gl {
       this.isInit = false;
       console.log("initialstate: about");
     } else {
+      this.switchPage(1);
       console.log("about");
+    }
+  }
+
+  async switchPage(value) {
+    // add a function to switch between different targets
+    // make sure we render both only when transitioning
+    // you might want to look at ping pong technique
+    // if your scenes are too heavy and don't want
+    // to render both at the same time
+
+    if (value === 1) {
+      // to about
+      this.aboutScene.shouldRender = true; // this controls raf
+      // technically not needed because we're using an if on the render function but you never know
+      this.aboutScene.visible = true;
+      await this.post.toPage(1);
+      this.scene.visible = false;
+      this.scene.shouldRender = false;
+    } else {
+      // to home
+      this.scene.shouldRender = true;
+      this.scene.visible = true;
+      await this.post.toPage(0);
+      this.aboutScene.visible = false;
+      this.aboutScene.shouldRender = false;
     }
   }
 }

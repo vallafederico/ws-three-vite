@@ -64,10 +64,14 @@ export class Gl {
     );
     this.camera.position.set(0, 0, 2);
 
-    this.scene = new Scene();
+    // !5.1 we attach cam and render to the vp and we pass it ot the scene
+    this.vp.renderer = this.renderer;
+    this.vp.camera = this.camera;
+
+    this.scene = new Scene({ vp: this.vp });
 
     // this.setupControls(); // !1 temporarily enable controls
-    // this.setupPost();
+    this.setupPost(); // !5.1 enable post
 
     // !3.1 initialise raycaster
     this.raycaster = new Raycaster();
@@ -129,10 +133,12 @@ export class Gl {
     this.controls?.update();
     this.slider?.update();
     // 4.2 pass slider X to scene
-    this.scene?.update(this.time, this.slider.x || 0);
+
+    // 5.1 get the rendered scene texture from the target and pass it to post
+    this.ringScene = this.scene?.update(this.time, this.slider.x || 0);
 
     if (this.post && this.post.isOn) {
-      this.post.renderPasses(this.time);
+      this.post.renderPasses(this.time, { rings: this.ringScene });
       this.post.render();
     } else {
       this.renderer.render(this.scene, this.camera);

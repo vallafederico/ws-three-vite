@@ -680,6 +680,8 @@ pageProduct(index) {
 
 ```
 
+_Now this is fine because webgl is real fast, but in general if you want to go for this approach I'd suggest handling a single gsap tween with a random object, use the `onUpdate` function and pass the value as scale to all children that go in 1 direction and rever it for the ones that go the other way. This way you'll end up with a single instead of one per item. We'll not spend more time on this because we go for a cooler tranistion and optimise there._
+
 ---
 
 ## 5. RenderTargets
@@ -688,6 +690,117 @@ pageProduct(index) {
 
 **checkout ``**
 _(mark !5.1)_
+
+- to render a scene to a texture you control we use a WebGlRenderTarget
+  - we need to give it the correct size
+- we use it by setting the renderer to render to this target, and pass only a what we want this target to render
+- we'll then pass the resulting texture to out post processing pass, and treat it as a normal texture
+  - you can think of threejs postprocessing as a 3d plane, always flat against the screen, that gets textures of things we renderer and does more shader work on top of it
+  - we render whatever we want not to the screen but to textures first
+  - we then this textures to this final plane
+  - the last pass is rendering this plane to the screen to display in the viewport
+- postprocessing is a nice thing to tweak on mobile to recover performance if needed
+
+```js
+
+
+
+
+//  * scene.js
+constructor({ vp }) {
+  super({});
+  this.vp = vp;
+}
+
+async load({ items }) {
+  this.rings = new Group();
+
+  // create render target for this scene
+  this.target = new WebGLRenderTarget(
+    this.vp.w * this.vp.dpr(),
+    this.vp.h * this.vp.dpr()
+  );
+
+  // ...
+}
+
+update(t, x) {
+  if (!this.shouldRender) return;
+
+  this.rings.position.x = -x; // !4.2 move group by slider X
+  this.rings?.children.forEach((ring) => ring.update(t));
+
+  // render to target and return from update function
+  this.vp.renderer.setRenderTarget(this.target);
+  this.vp.renderer.render(this.rings, this.vp.camera);
+  this.vp.renderer.setRenderTarget(null);
+
+  // return the target after animation
+  return this.target.texture;
+}
+
+resize(vp) {
+  // resize the target
+  this.vp = vp;
+  this.target.setSize(this.vp.w * this.vp.dpr(), this.vp.h * this.vp.dpr());
+
+  this.quad?.resize();
+}
+
+//  * gl.js
+render() {
+  // ...
+
+  //  get the rendered scene texture from the target and pass it to post
+  this.ringScene = this.scene?.update(this.time, this.slider.x || 0);
+
+  if (this.post && this.post.isOn) {
+    // pass it
+    this.post.renderPasses(this.time, { rings: this.ringScene });
+    this.post.render();
+  } else {
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+
+// * post.js`
+
+constructor() {
+  // ...
+
+  // we can avoid a useless render now because we're doing this manually
+  // this.renderPass = new RenderPass(scene, camera);
+  // this.addPass(this.renderPass);
+}
+
+
+createPasses() {
+  // restructure to access
+  this.mixpass = new MixPass();
+  this.addPass(this.mixpass);
+}
+
+renderPasses(t, { rings }) {
+  // get ring texture from scene and pass it to shader
+  this.mixpass.uniforms.u_rings.value = rings;
+}
+```
+
+```c++
+// * post/mix/fragment.frag
+
+// pass the ring
+uniform sampler2D u_rings;
+
+
+void main() {
+    // we're now using our texture instead of the basic render one
+    gl_FragColor.rgb = texture2D( u_rings, vUv ).rrr;
+    gl_FragColor.a = 1.;
+}
+
+```
 
 ### 5.2 Threejs Default Passes
 

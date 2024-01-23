@@ -14,11 +14,10 @@ export class Gl {
   }
 
   start({ canvas, items }) {
-    this.items = items;
-    // console.log("items", items);
-    // window.app = this;
+    // this.items = items;
+
     this.setup(canvas);
-    this.init();
+    this.init(items);
     this.initEvts();
   }
 
@@ -57,14 +56,11 @@ export class Gl {
 
     this.scene = new Scene();
 
-    // this.setupControls(); // uncomment to be able to move around
-    this.setupPost(); // uncomment to enable post processing
+    this.setupControls(); // !1 temporarily enable controls
+    // this.setupPost();
   }
 
   setupControls() {
-    // watch out can introduct weird behaviour in the DOM
-    // use it to debug only
-
     this.controls = new OrbitControls(this.camera, document.body);
     this.controls.enableZoom = false;
   }
@@ -78,15 +74,12 @@ export class Gl {
   }
 
   /** Lifecycle */
-  async init() {
-    this.assets = await this.scene.load();
+  async init(items) {
+    // !1 pass items from init to scene load function
+    this.assets = await this.scene.load({ items });
     this.nuxt.$bus.$emit("app:ready");
-    // console.log("ASSETS:", this.assets);
 
     this.shouldRender = true;
-
-    // called by the plugin directly
-    // this.render();
   }
 
   resize({ target }) {
@@ -102,8 +95,6 @@ export class Gl {
   }
 
   render() {
-    // this if we didn't use the gsap ticker
-    // requestAnimationFrame(this.render.bind(this));
     if (!this.shouldRender) return;
 
     this.time += 0.01;

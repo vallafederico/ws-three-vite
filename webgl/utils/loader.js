@@ -3,7 +3,7 @@ import { loadTexture } from "./load-texture";
 import { assets as file } from "../assets";
 
 export async function loadAssets(opt = null) {
-  console.time("assets::");
+  // console.time("assets::"); // !1 remove timer from here
   const assets = opt || file;
 
   const promises = [];
@@ -34,7 +34,7 @@ export async function loadAssets(opt = null) {
     return acc;
   }, {});
 
-  console.timeEnd("assets::");
+  // console.timeEnd("assets::");
 
   return result;
 }

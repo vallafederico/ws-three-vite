@@ -8,8 +8,8 @@ export const items = [
     slug: "000",
     ...defaults,
     webgl: {
-      model_url: "/webgl/001.glb",
-      texture_url: "/webgl/001.jpg",
+      model: "/webgl/001.glb",
+      texture: "/webgl/001.jpg",
     },
   },
   {
@@ -17,8 +17,8 @@ export const items = [
     slug: "001",
     ...defaults,
     webgl: {
-      model_url: "/webgl/001.glb",
-      texture_url: "/webgl/001.jpg",
+      model: "/webgl/002.glb",
+      texture: "/webgl/002.jpg",
     },
   },
   {
@@ -26,8 +26,8 @@ export const items = [
     slug: "002",
     ...defaults,
     webgl: {
-      model_url: "/webgl/002.glb",
-      texture_url: "/webgl/002.jpg",
+      model: "/webgl/003.glb",
+      texture: "/webgl/003.jpg",
     },
   },
   {
@@ -35,8 +35,8 @@ export const items = [
     slug: "003",
     ...defaults,
     webgl: {
-      model_url: "/webgl/003.glb",
-      texture_url: "/webgl/003.jpg",
+      model: "/webgl/004.glb",
+      texture: "/webgl/004.jpg",
     },
   },
   {
@@ -44,8 +44,8 @@ export const items = [
     slug: "004",
     ...defaults,
     webgl: {
-      model_url: "/webgl/004.glb",
-      texture_url: "/webgl/004.jpg",
+      model: "/webgl/005.glb",
+      texture: "/webgl/005.jpg",
     },
   },
   {
@@ -53,8 +53,8 @@ export const items = [
     slug: "005",
     ...defaults,
     webgl: {
-      model_url: "/webgl/005.glb",
-      texture_url: "/webgl/005.jpg",
+      model: "/webgl/006.glb",
+      texture: "/webgl/006.jpg",
     },
   },
   {
@@ -62,8 +62,8 @@ export const items = [
     slug: "006",
     ...defaults,
     webgl: {
-      model_url: "/webgl/006.glb",
-      texture_url: "/webgl/006.jpg",
+      model: "/webgl/007.glb",
+      texture: "/webgl/007.jpg",
     },
   },
   {
@@ -71,8 +71,8 @@ export const items = [
     slug: "007",
     ...defaults,
     webgl: {
-      model_url: "/webgl/007.glb",
-      texture_url: "/webgl/007.jpg",
+      model: "/webgl/008.glb",
+      texture: "/webgl/008.jpg",
     },
   },
   {
@@ -80,8 +80,8 @@ export const items = [
     slug: "008",
     ...defaults,
     webgl: {
-      model_url: "/webgl/008.glb",
-      texture_url: "/webgl/008.jpg",
+      model: "/webgl/009.glb",
+      texture: "/webgl/009.jpg",
     },
   },
   {
@@ -89,26 +89,8 @@ export const items = [
     slug: "009",
     ...defaults,
     webgl: {
-      model_url: "/webgl/009.glb",
-      texture_url: "/webgl/009.jpg",
-    },
-  },
-  {
-    name: "010",
-    slug: "010",
-    ...defaults,
-    webgl: {
-      model_url: "/webgl/010.glb",
-      texture_url: "/webgl/010.jpg",
-    },
-  },
-  {
-    name: "011",
-    slug: "011",
-    ...defaults,
-    webgl: {
-      model_url: "/webgl/011.glb",
-      texture_url: "/webgl/011.jpg",
+      model: "/webgl/010.glb",
+      texture: "/webgl/010.jpg",
     },
   },
 ];

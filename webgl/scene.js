@@ -1,45 +1,40 @@
-import { Scene as ThreeScene } from "three";
-import { Quad } from "./quad";
-// import { Model as Duck } from "./model";
-// import { Instance } from "./instance";
-
-import { loadAssets } from "./utils/loader";
+import { Scene as ThreeScene, Group } from "three";
+import { Ring } from "./ring";
 
 export class Scene extends ThreeScene {
   shouldRender = false;
   constructor() {
-    super({
-      // frustumCulled: false,
-    });
+    super({});
   }
 
-  async load() {
-    // this.assets = await loadAssets();
-    // console.log(this.assets);
+  async load({ items }) {
+    this.rings = new Group();
+
+    // !1 create rings and load them
+    this.rings.add(
+      ...items.map((item, index) => {
+        return new Ring({
+          data: item.webgl,
+          index,
+        });
+      })
+    );
+
+    this.add(this.rings);
+
+    console.time("load::scene");
+    await Promise.all(this.rings.children.map((ring) => ring.load()));
+    console.timeEnd("load::scene");
 
     this.create();
   }
 
   create() {
-    this.quad = new Quad();
-    this.add(this.quad);
-
-    // this.duck = new Duck({ geometry: this.assets.duck_model });
-    // this.add(this.duck);
-
-    // this.instance = new Instance({});
-    // this.add(this.instance);
-
     this.shouldRender = true;
   }
 
   update(t) {
     if (!this.shouldRender) return;
-    this.quad?.update(t);
-
-    this.quad.rotation.x = t;
-    this.quad.rotation.y = t;
-    this.quad.rotation.z = t;
   }
 
   resize(vp) {

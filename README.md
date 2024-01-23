@@ -290,9 +290,9 @@ void main() {
 
 ---
 
-## 3. Raycasting (events)
+## 3. Raycasting (3d events)
 
-**checkout ``**
+**checkout `7c33c8e`**
 _(mark !3)_
 
 The [Raycaster](https://threejs.org/docs/#api/en/core/Raycaster) is a class in three that allows us to to cast a ray from the camera to a mouse (or any vector2 position) and check if it intersects with any mesh on the scene. We use it to calculate clicks on meshes based on intersections.

@@ -453,7 +453,7 @@ async load({ matcap }) {
 
 ### 4.1 3D Model Hover
 
-**checkout ``**
+**checkout `0780e30`**
 _(mark !4.1)_
 
 First animation we can build is a hover effect. We alreayd have the raycaster, we just need to make sure since it fires continuosly, that it only fires once per event. We can build it all inside the Ring class itself, and trigger the event from the gl class.

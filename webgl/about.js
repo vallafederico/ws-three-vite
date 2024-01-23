@@ -13,7 +13,7 @@ import { loadAssets } from "./utils/loader";
 
 export class AboutScene extends ThreeScene {
   shouldRender = false;
-  constructor(vp) {
+  constructor({ vp }) {
     super({});
     this.vp = vp;
 

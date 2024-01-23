@@ -7,7 +7,7 @@
 
   const { $webgl } = useNuxtApp();
 
-  onBeforeMount(() => {
+  onMounted(() => {
     $webgl.gl.pageAbout("about");
   });
 </script>

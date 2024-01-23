@@ -64,7 +64,7 @@ export class Scene extends ThreeScene {
   resize(vp) {
     // !4.1 resize the render target
     this.vp = vp;
-    this.target.setSize(this.vp.w * this.vp.dpr(), this.vp.h * this.vp.dpr());
+    this.target?.setSize(this.vp.w * this.vp.dpr(), this.vp.h * this.vp.dpr());
 
     this.quad?.resize();
   }

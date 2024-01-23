@@ -1,10 +1,10 @@
 <script setup>
-  // !3 add mouse move from app.vue
   const { $webgl } = useNuxtApp();
 </script>
 
 <template>
-  <!-- !3.1 add mouse move from app.vue -->
+  <Canvas />
+
   <main @mousemove="$webgl.gl.onMouseMove" class="relative z-10">
     <Preloader />
     <Nav />
@@ -13,8 +13,6 @@
       <NuxtPage :transition="{ name: 'hello', mode: 'out-in' }" />
     </div>
   </main>
-
-  <Canvas />
 </template>
 
 <style>

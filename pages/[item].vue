@@ -11,7 +11,7 @@
   // !4.3 add the webgl context and pass mount function
   const { $webgl } = useNuxtApp();
 
-  onBeforeMount(() => {
+  onMounted(() => {
     $webgl.gl.pageProduct(data.index);
   });
 </script>

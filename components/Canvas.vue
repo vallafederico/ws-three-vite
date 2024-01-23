@@ -7,7 +7,7 @@
   useWindowResize((entry) => $webgl.gl.resize(entry[0]), canvas);
   onMounted(() => {
     // start when we have the canvas
-    $webgl.gl.start({ canvas: canvas.value, items });
+    $webgl.gl.data = { canvas: canvas.value, items };
   });
 </script>
 

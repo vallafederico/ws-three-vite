@@ -1,6 +1,5 @@
 import { WebGLRenderer, PerspectiveCamera, Raycaster } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-// import { gsap } from "../utils/gsap";
 
 import { Scene } from "./scene";
 import { AboutScene } from "./about";
@@ -11,28 +10,31 @@ export class Gl {
   shouldRender = false;
   isInit = true;
   time = 0;
-  // !3 create mouse propery
   mouse = { x: 0, y: 0 };
-  // !4.1 create animation tracking object
   a = {
     hoverCurr: null,
   };
-  // 4.3 add raycast state controller
   shouldRaycast = true;
-
+  // initial setup
+  // initialset = null;
+  scenes = { curr: null, currTx: null, next: null, nextTx: null };
   constructor({ $nuxt }) {
     this.nuxt = $nuxt;
   }
 
-  start({ canvas, items }) {
-    // this.items = items;
+  set data(data) {
+    const { canvas, items } = data;
+    this.canvas = canvas;
+    this.items = items;
+  }
 
-    this.setup(canvas);
-    this.init(items);
+  start(currentScene) {
+    this.setup(currentScene);
+    this.init();
     this.initEvts();
   }
 
-  setup(canvas) {
+  setup(currentScene) {
     // viewport utils
     this.vp = {
       w: window.innerWidth,
@@ -47,14 +49,13 @@ export class Gl {
 
     // webgl renderer
     this.renderer = new WebGLRenderer({
-      // antialias: true,
       alpha: true,
     });
 
     this.renderer.setPixelRatio(this.vp.dpr());
     this.renderer.setSize(this.vp.w, this.vp.h);
     this.renderer.setClearColor(0x000000, 1);
-    canvas.appendChild(this.renderer.domElement);
+    this.canvas.appendChild(this.renderer.domElement);
 
     // camera
     this.camera = new PerspectiveCamera(
@@ -63,20 +64,18 @@ export class Gl {
       0.1, // near
       1000 // far
     );
+
     this.camera.position.set(0, 0, 2);
 
-    // !5.1 we attach cam and render to the vp and we pass it ot the scene
     this.vp.renderer = this.renderer;
     this.vp.camera = this.camera;
 
-    this.scene = new Scene({ vp: this.vp });
-    // !5.3 create about page scene
-    this.aboutScene = new AboutScene(this.vp);
+    this.scenes.curr = new currentScene({ vp: this.vp });
+    this.scenes.next = new AboutScene({ vp: this.vp });
 
-    // this.setupControls(); // !1 temporarily enable controls
-    this.setupPost(); // !5.1 enable post
+    // this.setupControls();
+    this.setupPost();
 
-    // !3.1 initialise raycaster
     this.raycaster = new Raycaster();
     this.raycaster._isReady = false;
   }
@@ -95,23 +94,25 @@ export class Gl {
   }
 
   /** Lifecycle */
-  async init(items) {
-    // !1 pass items from init to scene load function
-    this.assets = await this.scene.load({ items });
+  async init() {
+    // console.log("init:call");
+
+    this.assets = await this.scenes.curr.load({ items: this.items });
     this.nuxt.$bus.$emit("app:ready");
 
     this.shouldRender = true;
 
-    // !3.1 set raycaster targets and make it active
-    this.raycaster._targets = this.scene.children[0].children.map(
+    this.raycaster._targets = this.scenes.curr.children[0].children.map(
       (item) => item.target
     );
     this.raycaster._isReady = true;
 
-    // !4.2 initialise slider
-    this.slider = new Slider([0, this.scene.children[0].children.length - 1], {
-      remap: 0.0001,
-    });
+    this.slider = new Slider(
+      [0, this.scenes.curr.children[0].children.length - 1],
+      {
+        remap: 0.0001,
+      }
+    );
   }
 
   resize({ target }) {
@@ -123,10 +124,8 @@ export class Gl {
     this.camera.aspect = this.vp.aspect();
     this.camera.updateProjectionMatrix();
 
-    // !5.2 resize post
     this.post?.resize(this.vp);
-
-    this.scene?.resize(this.vp);
+    this.scenes.curr?.resize(this.vp);
   }
 
   render() {
@@ -138,30 +137,25 @@ export class Gl {
 
     this.controls?.update();
     this.slider?.update();
-    // 4.2 pass slider X to scene
 
-    // 5.1 get the rendered scene texture from the target and pass it to post
+    if (this.scenes.curr && this.scenes.curr.shouldRender)
+      this.scenes.currTx = this.scenes.curr.update(
+        this.time,
+        this.slider?.x || 0
+      );
 
-    // !5.3
-    // we make the rendering of those conditional
-    // based on the shouldRender property
-    // so we control with a single one both the animations
-    // and the actual rendering process
-    if (this.scene && this.shouldRender)
-      this.ringTexture = this.scene?.update(this.time, this.slider.x || 0);
-
-    if (this.aboutScene && this.aboutScene.shouldRender)
-      this.aboutTexture = this.aboutScene?.update(this.time);
+    if (this.scenes.next && this.scenes.next.shouldRender)
+      this.scenes.nextTx = this.scenes.next.update(
+        this.time,
+        this.slider?.x || 0
+      );
 
     if (this.post && this.post.isOn) {
       this.post.renderPasses(this.time, {
-        // !5.3 pass both
-        rings: this.ringTexture,
-        about: this.aboutTexture,
+        rings: this.scenes.currTx,
+        about: this.scenes.nextTx,
       });
       this.post.render();
-    } else {
-      this.renderer.render(this.scene, this.camera);
     }
   }
 
@@ -173,30 +167,26 @@ export class Gl {
   castRay() {
     if (!this.raycaster._isReady) return;
 
-    // !3.1 cast ray function from mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
-
     const intersects =
       this.raycaster.intersectObjects(this.raycaster._targets)[0] || null;
 
     if (intersects) {
-      // !3.2 restructure intersects to get more data
       const { parent } = intersects.object;
-      this.rayHover(parent.index); // !4.1 call
+      this.rayHover(parent.index);
       return parent.data;
     } else {
-      this.rayHover(); // !4.1 call as empty
+      this.rayHover();
       return null;
     }
   }
 
   rayHover(index = null) {
-    // !4.1 hover function to change ring state
     if (index === this.a.hoverCurr) return;
     if (index !== null) {
-      this.scene.rings.children[index].onHover(1);
+      this.scenes.curr.rings.children[index].onHover(1);
     } else {
-      this.scene.rings.children[this.a.hoverCurr]?.onHover(0);
+      this.scenes.curr.rings.children[this.a.hoverCurr]?.onHover(0);
     }
 
     this.a.hoverCurr = index;
@@ -207,10 +197,6 @@ export class Gl {
   }
 
   onClick() {
-    // !3.2 click event from homepage to navigate to page
-    // we could alternatively emit an event back to the page using $bus
-    // this also automatically unmounts so nice
-
     const target = this.castRay();
 
     if (target !== null) {
@@ -220,63 +206,47 @@ export class Gl {
 
   onMouseMove(e) {
     if (!this.shouldRaycast) return;
-    // !3.1 mousemove event for raycasting, coordinates need normalisation
-    // comes from app.vue for consistency
+
     this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
     this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
 
     this.castRay();
 
-    // !4.2 mousemove event for slider
     this.slider?.onMouseMove(e);
   }
 
-  // !4.2 mouse events for slider
   onMouseDown(e) {
-    // console.log("mousedown");
     this.slider?.onMouseDown(e);
   }
 
   onMouseUp(e) {
-    // console.log("mousedown");
     this.slider?.onMouseUp(e);
   }
 
   /** Pages */
-
-  // !4.3 don't need this anymore
-  // onPageChange(name) {
-  //   if (this.isInit) {
-  //     this.isInit = false;
-  //     console.log("initialstate", name);
-  //   } else {
-  //     console.log("pagechange", name);
-  //   }
-  // }
-
-  // !4.3 create page based functions
   pageHome() {
-    this.shouldRaycast = true; // !4.3 control raycast
+    console.log("home");
+    this.shouldRaycast = true;
 
     if (this.isInit) {
       this.isInit = false;
-      // console.log("initialstate: home");
+      this.start(handleScenes("home"));
     } else {
       this.switchPage(0);
       this.slider.toPosition();
 
-      this.scene.rings.children.forEach((item, i) => {
-        gsap.to(item.scale, {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 1,
-          ease: "expo.out",
-          onStart: () => {
-            item.visible = true;
-          },
-        });
-      });
+      // this.scene.rings.children.forEach((item, i) => {
+      //   gsap.to(item.scale, {
+      //     x: 1,
+      //     y: 1,
+      //     z: 1,
+      //     duration: 1,
+      //     ease: "expo.out",
+      //     onStart: () => {
+      //       item.visible = true;
+      //     },
+      //   });
+      // });
     }
   }
 
@@ -285,6 +255,7 @@ export class Gl {
 
     if (this.isInit) {
       this.isInit = false;
+      this.start(handleScenes("home"));
       // console.log("initialstat:product");
     } else {
       // console.log("transitionto:product");
@@ -292,29 +263,29 @@ export class Gl {
       // !4.3 we scale everything and keep the selected one
       this.slider.toPosition(+index);
 
-      this.scene.rings.children.forEach((item, i) => {
-        item.onHover();
+      // this.scene.rings.children.forEach((item, i) => {
+      //   item.onHover();
 
-        if (i !== +index) {
-          gsap.to(item.scale, {
-            x: 0,
-            y: 0,
-            z: 0,
-            duration: 0.8,
-            onComplete: () => {
-              item.visible = false;
-            },
-          });
-        } else {
-          gsap.to(item.scale, {
-            x: 2,
-            y: 2,
-            z: 2,
-            duration: 1,
-            ease: "back.out",
-          });
-        }
-      });
+      //   if (i !== +index) {
+      //     gsap.to(item.scale, {
+      //       x: 0,
+      //       y: 0,
+      //       z: 0,
+      //       duration: 0.8,
+      //       onComplete: () => {
+      //         item.visible = false;
+      //       },
+      //     });
+      //   } else {
+      //     gsap.to(item.scale, {
+      //       x: 2,
+      //       y: 2,
+      //       z: 2,
+      //       duration: 1,
+      //       ease: "back.out",
+      //     });
+      //   }
+      // });
     }
   }
 
@@ -323,7 +294,8 @@ export class Gl {
 
     if (this.isInit) {
       this.isInit = false;
-      console.log("initialstate: about");
+      // console.log("initialstate: about");
+      this.start(handleScenes("about"));
     } else {
       this.switchPage(1);
       console.log("about");
@@ -331,27 +303,22 @@ export class Gl {
   }
 
   async switchPage(value) {
-    // add a function to switch between different targets
-    // make sure we render both only when transitioning
-    // you might want to look at ping pong technique
-    // if your scenes are too heavy and don't want
-    // to render both at the same time
+    // to about
+    const curr = this.scenes.curr;
+    this.scenes.curr = this.scenes.next;
+    this.scenes.next = curr;
+  }
+}
 
-    if (value === 1) {
-      // to about
-      this.aboutScene.shouldRender = true; // this controls raf
-      // technically not needed because we're using an if on the render function but you never know
-      this.aboutScene.visible = true;
-      await this.post.toPage(1);
-      this.scene.visible = false;
-      this.scene.shouldRender = false;
-    } else {
-      // to home
-      this.scene.shouldRender = true;
-      this.scene.visible = true;
-      await this.post.toPage(0);
-      this.aboutScene.visible = false;
-      this.aboutScene.shouldRender = false;
-    }
+/** Helpers */
+function handleScenes(sceneName) {
+  switch (sceneName) {
+    case "home":
+      return Scene;
+      break;
+    case "about":
+      return AboutScene;
+      break;
+    // case "product": Post; break;
   }
 }

@@ -7,7 +7,7 @@
 
   const { $bus, $webgl } = useNuxtApp();
 
-  onBeforeMount(() => {
+  onMounted(() => {
     // 4.3 change pages method
     $webgl.gl.pageHome("home");
   });

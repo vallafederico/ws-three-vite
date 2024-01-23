@@ -37,8 +37,11 @@ export class Scene extends ThreeScene {
     this.shouldRender = true;
   }
 
-  update(t) {
+  update(t, x) {
     if (!this.shouldRender) return;
+
+    this.rings.position.x = -x; // !4.2 move group by slider X
+    // console.log(x);
 
     // !2 to rotate from the children update() we need to pass the time through
     // notice we don't rotate the group as that will have it's own matrix

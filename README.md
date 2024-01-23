@@ -552,6 +552,75 @@ void main() {
 **checkout ``**
 _(mark !4.2)_
 
+- **Sliding webgl scene:**
+- we create a basic `slider.js` class
+- events from vue passed through `gl.js`
+- we then slider the whole group containing the rings
+  - this way we only update a single transform matrix, and it gets automatically registered in out slader thanks to the modelMatrix
+
+```jsx
+// * index.vue
+  <div
+    @click="$webgl.gl.onClick"
+    @mousedown="$webgl.gl.onMouseDown"
+    @mouseup="$webgl.gl.onMouseUp"
+    class="h-screen py-10"
+  >
+
+    <!-- add add slider events on the homepage only -->
+
+    {/* ... */}
+  </div>
+```
+
+```js
+// * gl.js
+async init(items) {
+  // ...
+
+  // initialise slider
+  this.slider = new Slider([0, this.scene.children[0].children.length - 1], {
+    remap: 0.0001,
+  });
+}
+
+// ...
+
+// mouse events for slider
+onMouseMove(e) {
+  // ...
+  this.slider?.onMouseMove(e);
+}
+
+onMouseDown(e) {
+  this.slider?.onMouseDown(e);
+}
+
+onMouseUp(e) {
+  this.slider?.onMouseUp(e);
+}
+
+render() {
+  // ...
+
+  //render slider and pass X to scene
+  this.slider?.update();
+  this.scene?.update(this.time, this.slider.x || 0);
+
+  // ...
+}
+
+// * scene.js
+update(t, x) {
+  if (!this.shouldRender) return;
+
+  // move group by slider X
+  this.rings.position.x = -x;
+
+  this.rings?.children.forEach((ring) => ring.update(t));
+}
+```
+
 ### 4.3 Page transition
 
 _(mark !4.3)_

@@ -4,6 +4,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 import { Scene } from "./scene";
 import { Post } from "./post";
+import { Slider } from "./slider";
 
 export class Gl {
   shouldRender = false;
@@ -97,7 +98,11 @@ export class Gl {
       (item) => item.target
     );
     this.raycaster._isReady = true;
-    // console.log(this.raycaster);
+
+    // !4.2 initialise slider
+    this.slider = new Slider([0, this.scene.children[0].children.length - 1], {
+      remap: 0.0001,
+    });
   }
 
   resize({ target }) {
@@ -120,7 +125,9 @@ export class Gl {
     // console.log(this.nuxt.$scroll.lenis.scroll);
 
     this.controls?.update();
-    this.scene?.update(this.time);
+    this.slider?.update();
+    // 4.2 pass slider X to scene
+    this.scene?.update(this.time, this.slider.x || 0);
 
     if (this.post && this.post.isOn) {
       this.post.renderPasses(this.time);
@@ -133,15 +140,6 @@ export class Gl {
   /** Events */
   onScroll(e) {
     // console.log(e);
-  }
-
-  onMouseMove(e) {
-    // !3.1 mousemove event for raycasting, coordinates need normalisation
-    // comes from app.vue for consistency
-    this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
-    this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
-
-    this.castRay();
   }
 
   castRay() {
@@ -199,5 +197,28 @@ export class Gl {
     } else {
       console.log("pagechange", name);
     }
+  }
+
+  onMouseMove(e) {
+    // !3.1 mousemove event for raycasting, coordinates need normalisation
+    // comes from app.vue for consistency
+    this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
+    this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
+
+    this.castRay();
+
+    // !4.2 mousemove event for slider
+    this.slider?.onMouseMove(e);
+  }
+
+  // !4.2 mouse events for slider
+  onMouseDown(e) {
+    // console.log("mousedown");
+    this.slider?.onMouseDown(e);
+  }
+
+  onMouseUp(e) {
+    // console.log("mousedown");
+    this.slider?.onMouseUp(e);
   }
 }

@@ -388,7 +388,7 @@ create({ geometry, diffuse, matcap }) {
 
 ### 3.2 Sending events and changing page
 
-**checkout `...`**
+**checkout `0fca226`**
 _(mark !3.2)_
 
 - **Setup basic Event pipeline:**

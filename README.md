@@ -623,7 +623,7 @@ update(t, x) {
 
 ### 4.3 (Basic) Page transition
 
-**checkout ``**
+**checkout `47a91e2`**
 _(mark !4.3)_
 
 - **Page based animaton:**

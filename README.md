@@ -286,12 +286,103 @@ void main() {
 
 **(\*) When multiplying matrices vectors order of operation is important, and the matrix always comes first**
 
+[TODO \* add image step1.jpeg]
+
 ---
 
 ## 3. Raycasting (events)
 
 **checkout ``**
 _(mark !3)_
+
+The [Raycaster](https://threejs.org/docs/#api/en/core/Raycaster) is a class in three that allows us to to cast a ray from the camera to a mouse (or any vector2 position) and check if it intersects with any mesh on the scene. We use it to calculate clicks on meshes based on intersections.
+
+We want to set it up in `gl.js` as we'll need the mouse position for this and we might want to to more with this later.
+
+- First step is to add mouse move events, and remap the coordinates to -1 to 1 both in X and Y
+- The initialise the raycaster, and calculate the intersections with our meshes
+
+  - we're using pretty complex meshes though, and the performance will suffer.
+
+- To fix this we create invisible target meshes in the `ring.js` class, set it to not be seen, and we'll check intersection on those.
+
+- we set the event from vue and call a method on the webgl class
+
+```jsx
+// * app.vue
+<script setup>
+  const { $webgl } = useNuxtApp();
+</script>
+
+<template>
+
+  <main @mousemove="$webgl.gl.onMouseMove" class="relative z-10">
+  {/* ... */}
+  </main>
+
+{/* ... */}
+</template>
+```
+
+```js
+// * gl.js
+setup(canvas) {
+  // ...
+  // initialise raycaster
+  this.raycaster = new Raycaster();
+  this.raycaster._isReady = false;
+}
+
+async init(items) {
+  // ...
+
+  // set raycaster targets and make it active
+  this.raycaster._targets = this.scene.children[0].children.map(
+    (item) => item.target
+  );
+  this.raycaster._isReady = true;
+}
+
+onMouseMove(e) {
+  // mousemove event for raycasting, coordinates need normalisation
+  // comes from app.vue for consistency
+  this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
+  this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
+
+  this.castRay();
+}
+
+castRay() {
+  if (!this.raycaster._isReady) return;
+
+  // cast ray function from mouse position
+  this.raycaster.setFromCamera(this.mouse, this.camera);
+
+  const intersects =
+    this.raycaster.intersectObjects(this.raycaster._targets)[0] || null;
+
+  if (intersects) {
+    const { index } = intersects.object.parent;
+    console.log(index);
+    return index;
+  }
+}
+
+
+// * ring.js
+create({ geometry, diffuse, matcap }) {
+  // ...
+
+  // create a target simple mesh and make it invisible
+  this.target = new Mesh(
+    new BoxGeometry(0.5, 0.5, 0.5),
+    new MeshBasicMaterial({ color: 0xff0000 })
+  );
+  this.target.visible = false;
+
+  this.add(...group.children, this.target);
+}
+```
 
 ---
 

@@ -1,4 +1,11 @@
-import { Group, ShaderMaterial, DoubleSide } from "three";
+import {
+  Group,
+  ShaderMaterial,
+  DoubleSide,
+  BoxGeometry,
+  MeshBasicMaterial,
+  Mesh,
+} from "three";
 import vertexShader from "./vertex.vert";
 import fragmentShader from "./fragment.frag";
 import { loadAssets } from "../utils/loader";
@@ -37,7 +44,15 @@ export class Ring extends Group {
     // !1 use the index to move items
     this.position.x = this.index;
 
-    this.add(...group.children);
+    this.target = new Mesh(
+      new BoxGeometry(0.5, 0.5, 0.5),
+      new MeshBasicMaterial({ color: 0xff0000 })
+    );
+    this.target.visible = false;
+
+    this.add(...group.children, this.target);
+
+    // this.add(...group.children);
   }
 
   resize() {}

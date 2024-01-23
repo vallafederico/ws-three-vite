@@ -1,7 +1,11 @@
-<script setup></script>
+<script setup>
+  // !3 add mouse move from app.vue
+  const { $webgl } = useNuxtApp();
+</script>
 
 <template>
-  <main class="relative z-10">
+  <!-- !3 add mouse move from app.vue -->
+  <main @mousemove="$webgl.gl.onMouseMove" class="relative z-10">
     <Preloader />
     <Nav />
 

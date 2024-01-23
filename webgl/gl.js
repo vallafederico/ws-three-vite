@@ -1,4 +1,4 @@
-import { WebGLRenderer, PerspectiveCamera } from "three";
+import { WebGLRenderer, PerspectiveCamera, Raycaster } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 // import { gsap } from "../utils/gsap";
 
@@ -9,6 +9,8 @@ export class Gl {
   shouldRender = false;
   isInit = true;
   time = 0;
+  // !3 create mouse propery
+  mouse = { x: 0, y: 0 };
   constructor({ $nuxt }) {
     this.nuxt = $nuxt;
   }
@@ -58,6 +60,10 @@ export class Gl {
 
     this.setupControls(); // !1 temporarily enable controls
     // this.setupPost();
+
+    // !3 initialise raycaster
+    this.raycaster = new Raycaster();
+    this.raycaster._isReady = false;
   }
 
   setupControls() {
@@ -80,6 +86,13 @@ export class Gl {
     this.nuxt.$bus.$emit("app:ready");
 
     this.shouldRender = true;
+
+    // !3 set raycaster targets and make it active
+    this.raycaster._targets = this.scene.children[0].children.map(
+      (item) => item.target
+    );
+    this.raycaster._isReady = true;
+    // console.log(this.raycaster);
   }
 
   resize({ target }) {
@@ -115,6 +128,31 @@ export class Gl {
   /** Events */
   onScroll(e) {
     // console.log(e);
+  }
+
+  onMouseMove(e) {
+    // !3 mousemove event for raycasting, coordinates need normalisation
+    // comes from app.vue for consistency
+    this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
+    this.mouse.y = -(e.clientY / this.vp.h) * 2 + 1;
+
+    this.castRay();
+  }
+
+  castRay() {
+    if (!this.raycaster._isReady) return;
+
+    // !3 cast ray function from mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    const intersects =
+      this.raycaster.intersectObjects(this.raycaster._targets)[0] || null;
+
+    if (intersects) {
+      const { index } = intersects.object.parent;
+      console.log(index);
+      return index;
+    }
   }
 
   initEvts() {
